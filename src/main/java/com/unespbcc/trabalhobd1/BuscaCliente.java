@@ -121,7 +121,7 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
             }
         });
 
-        cbBuscaCEP.setText("CEP");
+        cbBuscaCEP.setText("Número");
         cbBuscaCEP.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 cbBuscaCEPStateChanged(evt);
@@ -175,7 +175,7 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
 
         cbExibeCidade.setText("Cidade");
 
-        cbExibeCEP.setText("CEP");
+        cbExibeCEP.setText("Número");
 
         cbExibeRG.setText("RG");
 
@@ -233,7 +233,7 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
 
         txtBuscaCidade.setEnabled(false);
 
-        jLabel5.setText("CEP:");
+        jLabel5.setText("Número:");
 
         txtBuscaCEP.setEnabled(false);
 
@@ -256,7 +256,7 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
         });
 
         try {
-            txtBuscaCPF.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("###########")));
+            txtBuscaCPF.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -303,7 +303,7 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
                                         .addComponent(jLabel5)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(txtBuscaCEP)))))
-                        .addContainerGap(24, Short.MAX_VALUE))
+                        .addContainerGap(16, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btnCancelaBuscaCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

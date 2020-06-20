@@ -69,7 +69,7 @@
                               </Group>
                           </Group>
                       </Group>
-                      <EmptySpace pref="24" max="32767" attributes="0"/>
+                      <EmptySpace pref="16" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="btnCancelaBuscaCli" min="-2" max="-2" attributes="0"/>
@@ -222,7 +222,7 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="cbBuscaCEP">
           <Properties>
-            <Property name="text" type="java.lang.String" value="CEP"/>
+            <Property name="text" type="java.lang.String" value="N&#xfa;mero"/>
           </Properties>
           <Events>
             <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="cbBuscaCEPStateChanged"/>
@@ -320,7 +320,7 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="cbExibeCEP">
           <Properties>
-            <Property name="text" type="java.lang.String" value="CEP"/>
+            <Property name="text" type="java.lang.String" value="N&#xfa;mero"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="cbExibeRG">
@@ -372,7 +372,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel5">
       <Properties>
-        <Property name="text" type="java.lang.String" value="CEP:"/>
+        <Property name="text" type="java.lang.String" value="N&#xfa;mero:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtBuscaCEP">
@@ -413,7 +413,7 @@
     <Component class="javax.swing.JFormattedTextField" name="txtBuscaCPF">
       <Properties>
         <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
-          <Format format="###########" subtype="-1" type="5"/>
+          <Format format="" subtype="-1" type="5"/>
         </Property>
       </Properties>
     </Component>

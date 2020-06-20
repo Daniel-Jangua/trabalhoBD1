@@ -83,7 +83,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
 
         jLabel6.setText("Cidade:");
 
-        jLabel7.setText("CEP:");
+        jLabel7.setText("Número:");
 
         try {
             txtCEPCli.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));
@@ -104,7 +104,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
                     .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRuaCli, javax.swing.GroupLayout.DEFAULT_SIZE, 393, Short.MAX_VALUE)
+                    .addComponent(txtRuaCli, javax.swing.GroupLayout.DEFAULT_SIZE, 389, Short.MAX_VALUE)
                     .addComponent(txtBairroCli)
                     .addComponent(txtCidadeCli)
                     .addGroup(jPanel1Layout.createSequentialGroup()

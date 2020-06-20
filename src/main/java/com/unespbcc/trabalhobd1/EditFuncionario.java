@@ -91,7 +91,7 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
 
         jLabel6.setText("Cidade:");
 
-        jLabel7.setText("CEP:");
+        jLabel7.setText("Número:");
 
         try {
             txtCEPFunc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));

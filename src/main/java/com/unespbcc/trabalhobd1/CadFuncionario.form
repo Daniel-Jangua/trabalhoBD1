@@ -41,7 +41,7 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtNomeFunc" pref="429" max="32767" attributes="0"/>
+                          <Component id="txtNomeFunc" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Component id="txtCPFFunc" min="-2" pref="206" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -54,7 +54,7 @@
                           <Component id="jLabel3" max="32767" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="txtCTPSFunc" min="-2" pref="206" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="219" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="223" max="-2" attributes="0"/>
                       </Group>
                       <Component id="btnCancelaCadFunc" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -211,7 +211,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel7">
           <Properties>
-            <Property name="text" type="java.lang.String" value="CEP:"/>
+            <Property name="text" type="java.lang.String" value="N&#xfa;mero:"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtRuaFunc">

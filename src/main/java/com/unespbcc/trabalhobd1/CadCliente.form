@@ -157,7 +157,7 @@
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="txtRuaCli" alignment="0" pref="393" max="32767" attributes="0"/>
+                      <Component id="txtRuaCli" alignment="0" pref="389" max="32767" attributes="0"/>
                       <Component id="txtBairroCli" alignment="0" max="32767" attributes="0"/>
                       <Component id="txtCidadeCli" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
@@ -215,7 +215,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel7">
           <Properties>
-            <Property name="text" type="java.lang.String" value="CEP:"/>
+            <Property name="text" type="java.lang.String" value="N&#xfa;mero:"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="txtCidadeCli">

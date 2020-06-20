@@ -156,7 +156,7 @@ public class BuscaFuncionario extends javax.swing.JInternalFrame {
 
         cbExibirCidade.setText("Cidade");
 
-        cbExibirCEP.setText("CEP");
+        cbExibirCEP.setText("Número");
 
         cbExibirSalario.setText("Salário");
 
@@ -355,10 +355,10 @@ public class BuscaFuncionario extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancelaBusca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnBuscaFunc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(52, Short.MAX_VALUE))
         );
 
-        setBounds(0, 0, 510, 345);
+        setBounds(0, 0, 520, 345);
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
