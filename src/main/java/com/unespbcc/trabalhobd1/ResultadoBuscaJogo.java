@@ -6,8 +6,18 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -19,9 +29,27 @@ public class ResultadoBuscaJogo extends javax.swing.JInternalFrame {
      * Creates new form ResultadoBuscaJogo
      */
     BuscaJogo fonte;
-    public ResultadoBuscaJogo(BuscaJogo f) {
+    ResultSet rs;
+    Connection con;
+    public ResultadoBuscaJogo(BuscaJogo f, ResultSet r) {
         initComponents();
         fonte = f;
+        rs = r;
+        
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try {
+            tbResBuscaJogo.setModel(buildTableModel(rs));
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     /**
@@ -48,6 +76,11 @@ public class ResultadoBuscaJogo extends javax.swing.JInternalFrame {
         jPopupMenu1.add(menuEditaJogo);
 
         menuExcluiJogo.setText("Excluir");
+        menuExcluiJogo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuExcluiJogoActionPerformed(evt);
+            }
+        });
         jPopupMenu1.add(menuExcluiJogo);
 
         setClosable(true);
@@ -105,7 +138,12 @@ public class ResultadoBuscaJogo extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaJogo.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnBuscaJogo.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -128,13 +166,56 @@ public class ResultadoBuscaJogo extends javax.swing.JInternalFrame {
 
     private void menuEditaJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditaJogoActionPerformed
         // TODO add your handling code here:
-        EditJogo editJogo = new EditJogo();
+        
+        EditJogo editJogo = new EditJogo(tbResBuscaJogo.getValueAt(tbResBuscaJogo.getSelectedRow(), 0).toString(),this);
         fonte.jp.jDesktopPane1.add(editJogo);
         Dimension d = fonte.jp.jDesktopPane1.getSize();
         editJogo.setLocation((d.width - editJogo.getSize().width) / 2, (d.height - editJogo.getSize().height) / 2);
         editJogo.setVisible(true);
     }//GEN-LAST:event_menuEditaJogoActionPerformed
 
+    private void menuExcluiJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExcluiJogoActionPerformed
+        // TODO add your handling code here:
+        int op = JOptionPane.showConfirmDialog(fonte.jp, "Tem certeza que deseja excluir jogo?", "Atenção!", JOptionPane.OK_CANCEL_OPTION);
+        if(op == JOptionPane.CANCEL_OPTION)
+            return;
+        String sql = "DELETE FROM jogo WHERE codigo_jogo = " + tbResBuscaJogo.getValueAt(tbResBuscaJogo.getSelectedRow(), 0);
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir jogo!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+        JOptionPane.showMessageDialog(fonte.jp,"Jogo excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }//GEN-LAST:event_menuExcluiJogoActionPerformed
+
+    public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // names of columns
+        Vector<String> columnNames = new Vector<String>();
+        int columnCount = metaData.getColumnCount();
+        for (int column = 1; column <= columnCount; column++) {
+            columnNames.add(metaData.getColumnName(column).toUpperCase());
+        }
+
+        // data of the table
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        while (rs.next()) {
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(rs.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+
+        return new DefaultTableModel(data, columnNames);
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPopupMenu jPopupMenu1;

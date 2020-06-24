@@ -6,6 +6,15 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,9 +26,21 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
      * Creates new form buscaCliente
      */
     JanelaPrincipal jp;
+    Connection con;
     public BuscaCliente(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaCli.setEnabled(true);
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaCli.setEnabled(true);
+            return;
+        }
     }
 
     /**
@@ -256,7 +277,7 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
         });
 
         try {
-            txtBuscaCPF.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("")));
+            txtBuscaCPF.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("###########")));
         } catch (java.text.ParseException ex) {
             ex.printStackTrace();
         }
@@ -354,6 +375,11 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
         // TODO add your handling code here:
+        try{
+            con.close();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível fechar a conexão com o Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
         jp.menuBuscaCli.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -407,8 +433,92 @@ public class BuscaCliente extends javax.swing.JInternalFrame {
 
     private void btnBuscaCliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscaCliActionPerformed
         // TODO add your handling code here:
+        ResultSet rs = null;
+        String colunas = "cpf as CPF,";
+        if(cbExibeRG.isSelected())
+            colunas = colunas + "rg as RG,";
+        if(cbExibeNome.isSelected())
+            colunas = colunas + "nome as Nome,";
+        if(cbExibeRua.isSelected())
+            colunas = colunas + "rua as Rua,";
+        if(cbExibeBairro.isSelected())
+            colunas = colunas + "bairro as Bairro,";
+        if(cbExibeCidade.isSelected())
+            colunas = colunas + "cidade as Cidade,";
+        if(cbExibeCEP.isSelected())
+            colunas = colunas + "num as Número,";
+        if(cbExibeTel.isSelected())
+            colunas = colunas + "telefone as Telefone,";
+        colunas = colunas.substring(0, colunas.length()-1); // elimina a ultima virgula
+        String sql = "SELECT " + colunas + " FROM pessoaCliente ";
+        String busca = "";
+        if(cbBuscaCPF.isSelected() || cbBuscaRG.isSelected() || cbBuscaNome.isSelected() || cbBuscaCEP.isSelected() || cbBuscaCidade.isSelected() || cbBuscaTel.isSelected()){
+            sql = sql + "WHERE";
+            if(cbBuscaCPF.isSelected()){
+                if(txtBuscaCPF.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaCli.setEnabled(true);
+                    return;
+                }
+                busca = busca + " cpf = " + txtBuscaCPF.getText() + " and";
+            }
+            if(cbBuscaRG.isSelected()){
+                if(txtBuscaRG.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaCli.setEnabled(true);
+                    return;
+                }
+                busca = busca + " rg = " + txtBuscaRG.getText() + " and";
+            }
+            if(cbBuscaNome.isSelected()){
+                if(txtBuscaNome.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaCli.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome like '%" + txtBuscaNome.getText() + "%' and";
+            }
+            if(cbBuscaCEP.isSelected()){
+                if(txtBuscaCEP.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaCli.setEnabled(true);
+                    return;
+                }
+                busca = busca + " num = " + txtBuscaCEP.getText() + " and";
+            }
+            if(cbBuscaCidade.isSelected()){
+                if(txtBuscaCidade.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaCli.setEnabled(true);
+                    return;
+                }
+                busca = busca + " cidade like '%" + txtBuscaCidade.getText() + "%' and";
+            }
+            if(cbBuscaTel.isSelected()){
+                if(txtBuscaTel.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaCli.setEnabled(true);
+                    return;
+                }
+                busca = busca + " telefone = " + txtBuscaTel.getText() + " and";
+            }
+            busca = busca.substring(0, busca.length()-3); // remove ultimo and
+            sql = sql + busca;
+        }
+        
+        //System.out.println(sql);
+        //System.exit(0);
+        
+        try{
+            PreparedStatement stm = con.prepareStatement(sql);
+            rs = stm.executeQuery();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar busca no Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaCli.setEnabled(true);
+            return;
+        }
         btnBuscaCli.setEnabled(false);
-        ResultadoBuscaCli resBuscaCli = new ResultadoBuscaCli(this);
+        ResultadoBuscaCli resBuscaCli = new ResultadoBuscaCli(this,rs);
         jp.jDesktopPane1.add(resBuscaCli);
         Dimension d = jp.jDesktopPane1.getSize();
         resBuscaCli.setLocation((d.width - resBuscaCli.getSize().width) / 2, (d.height - resBuscaCli.getSize().height) / 2);

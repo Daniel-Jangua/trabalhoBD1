@@ -5,6 +5,13 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,9 +21,19 @@ public class CadCliente extends javax.swing.JInternalFrame {
     /**
      * Creates new form CadCliente
      */
+    Connection con;
     public CadCliente(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
 
     /**
@@ -40,7 +57,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
         txtCidadeCli = new javax.swing.JTextField();
         txtBairroCli = new javax.swing.JTextField();
         txtRuaCli = new javax.swing.JTextField();
-        txtCEPCli = new javax.swing.JFormattedTextField();
+        txtCEPCli = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtTelCli = new javax.swing.JTextField();
         btnCancelaCadCli = new javax.swing.JButton();
@@ -85,12 +102,6 @@ public class CadCliente extends javax.swing.JInternalFrame {
 
         jLabel7.setText("Número:");
 
-        try {
-            txtCEPCli.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));
-        } catch (java.text.ParseException ex) {
-            ex.printStackTrace();
-        }
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -108,7 +119,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
                     .addComponent(txtBairroCli)
                     .addComponent(txtCidadeCli)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtCEPCli, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtCEPCli, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -131,7 +142,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtCEPCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         jLabel8.setText("Telefone:");
@@ -226,7 +237,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancelaCadCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCadCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(80, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         setBounds(0, 0, 500, 420);
@@ -234,10 +245,45 @@ public class CadCliente extends javax.swing.JInternalFrame {
 
     private void btnCadCliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadCliActionPerformed
         // TODO add your handling code here:
+        String sql = "INSERT INTO pessoa(cpf,nome,rua,bairro,cidade,numero_casa) VALUES"
+                + " ("+txtCPFCli.getText()+",'"+txtNomeCli.getText()+"','"
+                + txtRuaCli.getText()+"','"+txtBairroCli.getText()+"','"
+                + txtCidadeCli.getText()+"',"+txtCEPCli.getText()+")";
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar a inserção!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        sql = "INSERT INTO cliente(cpf,rg,telefone) VALUES"
+                + " ("+txtCPFCli.getText()+","+txtRGCli.getText()+",'"+txtTelCli.getText()+"')";
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar a inserção!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(jp, "Cadastro realizado com sucesso!","Cadastro",JOptionPane.INFORMATION_MESSAGE);
+        txtCPFCli.setText("");
+        txtRGCli.setText("");
+        txtNomeCli.setText("");
+        txtRuaCli.setText("");
+        txtBairroCli.setText("");
+        txtCidadeCli.setText("");
+        txtCEPCli.setText("");
+        txtTelCli.setText("");
     }//GEN-LAST:event_btnCadCliActionPerformed
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CadCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuCadCli.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -260,7 +306,7 @@ public class CadCliente extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtBairroCli;
-    private javax.swing.JFormattedTextField txtCEPCli;
+    private javax.swing.JTextField txtCEPCli;
     private javax.swing.JFormattedTextField txtCPFCli;
     private javax.swing.JTextField txtCidadeCli;
     private javax.swing.JTextField txtNomeCli;

@@ -5,6 +5,13 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,9 +21,19 @@ public class CadJogo extends javax.swing.JInternalFrame {
     /**
      * Creates new form CadJogos
      */
+    Connection con;
     public CadJogo(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
 
     /**
@@ -95,6 +112,11 @@ public class CadJogo extends javax.swing.JInternalFrame {
 
         btnCadJogo.setText("Cadastrar");
         btnCadJogo.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnCadJogo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadJogoActionPerformed(evt);
+            }
+        });
 
         txtPrecoJogo.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.00"))));
 
@@ -110,7 +132,7 @@ public class CadJogo extends javax.swing.JInternalFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 52, Short.MAX_VALUE))
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -176,7 +198,12 @@ public class CadJogo extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_txtCodJogoActionPerformed
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CadJogo.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuCadJogo.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -184,6 +211,29 @@ public class CadJogo extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         dispose();
     }//GEN-LAST:event_btnCancelaCadJogoActionPerformed
+
+    private void btnCadJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadJogoActionPerformed
+        // TODO add your handling code here:
+        String sql = "INSERT INTO jogo(codigo_jogo,nome_jogo,descricao_jogo,preco_jogo,em_estoque,locacao) VALUES"
+                + " ("+txtCodJogo.getText()+",'"+txtNomeJogo.getText()+"','"
+                + txtDescJogo.getText()+"',"+txtPrecoJogo.getText().replace(',', '.')+","
+                + cbEstoqueJogo.isSelected()+","+cbLocJogo.isSelected()+")";
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar a inserção!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(jp, "Cadastro realizado com sucesso!","Cadastro",JOptionPane.INFORMATION_MESSAGE);
+        txtCodJogo.setText("");
+        txtNomeJogo.setText("");
+        txtDescJogo.setText("");
+        txtPrecoJogo.setText("");
+        cbEstoqueJogo.setSelected(false);
+        cbLocJogo.setSelected(false);
+    }//GEN-LAST:event_btnCadJogoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

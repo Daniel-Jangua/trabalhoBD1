@@ -52,19 +52,15 @@
                       </Group>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="btnCancelaBuscaJogo" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
-                              <Component id="btnBuscaJogo" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="btnCancelaBuscaJogo" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
+                      <Component id="btnBuscaJogo" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="209" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="jPanel2" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -101,7 +97,7 @@
                   <Component id="btnCancelaBuscaJogo" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnBuscaJogo" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="61" max="32767" attributes="0"/>
+              <EmptySpace pref="57" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -202,12 +198,13 @@
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Component id="cbExibeDesc" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="cbExibeEstoque" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <Component id="cbExibePreco" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbExibeDesc" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbExibePreco" alignment="0" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="cbExibeLocacao" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbExibeEstoque" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -225,6 +222,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="cbExibeNome" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="cbExibePreco" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="cbExibeLocacao" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
               </Group>
@@ -257,6 +255,11 @@
         <Component class="javax.swing.JCheckBox" name="cbExibeEstoque">
           <Properties>
             <Property name="text" type="java.lang.String" value="Em estoque"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="cbExibeLocacao">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Loca&#xe7;&#xe3;o"/>
           </Properties>
         </Component>
       </SubComponents>

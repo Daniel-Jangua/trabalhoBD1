@@ -6,6 +6,13 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,9 +24,21 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
      * Creates new form BuscaJogo
      */
     JanelaPrincipal jp;
+    Connection con;
     public BuscaJogo(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+           
+            return;
+        }
     }
 
     /**
@@ -41,6 +60,7 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
         cbExibeDesc = new javax.swing.JCheckBox();
         cbExibePreco = new javax.swing.JCheckBox();
         cbExibeEstoque = new javax.swing.JCheckBox();
+        cbExibeLocacao = new javax.swing.JCheckBox();
         jPanel3 = new javax.swing.JPanel();
         cbFiltraEstoque = new javax.swing.JCheckBox();
         cbFiltraLoc = new javax.swing.JCheckBox();
@@ -143,6 +163,8 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
 
         cbExibeEstoque.setText("Em estoque");
 
+        cbExibeLocacao.setText("Locação");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -154,11 +176,12 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
                     .addComponent(cbExibeNome))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(cbExibeDesc)
-                        .addGap(18, 18, 18)
-                        .addComponent(cbExibeEstoque))
+                    .addComponent(cbExibeDesc)
                     .addComponent(cbExibePreco))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cbExibeLocacao)
+                    .addComponent(cbExibeEstoque))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -171,7 +194,8 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbExibeNome)
-                    .addComponent(cbExibePreco))
+                    .addComponent(cbExibePreco)
+                    .addComponent(cbExibeLocacao))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
@@ -304,16 +328,14 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
                                 .addComponent(txtBuscaCod, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnCancelaBuscaJogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(55, 55, 55)
-                                .addComponent(btnBuscaJogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(btnCancelaBuscaJogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(55, 55, 55)
+                        .addComponent(btnBuscaJogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 209, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -341,14 +363,19 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancelaBuscaJogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnBuscaJogo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(61, Short.MAX_VALUE))
+                .addContainerGap(57, Short.MAX_VALUE))
         );
 
         setBounds(0, 0, 500, 380);
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(BuscaJogo.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuBuscaJogo.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -410,7 +437,84 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
 
     private void btnBuscaJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscaJogoActionPerformed
         // TODO add your handling code here:
-        ResultadoBuscaJogo resBuscaJogo = new ResultadoBuscaJogo(this);
+        
+        ResultSet rs = null;
+        String colunas = "codigo_jogo,";
+        if(cbExibeNome.isSelected())
+            colunas = colunas + "nome_jogo,";
+        if(cbExibeDesc.isSelected())
+            colunas = colunas + "descricao_jogo,";
+        if(cbExibeEstoque.isSelected())
+            colunas = colunas + "em_estoque,";
+        if(cbExibeLocacao.isSelected())
+            colunas = colunas + "locacao,";
+        if(cbExibePreco.isSelected())
+            colunas = colunas + "preco_jogo,";
+        colunas = colunas.substring(0, colunas.length()-1);
+        String sql = "SELECT " + colunas + " FROM jogo ";
+        String busca = "";
+        if(cbBuscaCodigo.isSelected() || cbBuscaDesc.isSelected() || cbBuscaNome.isSelected() || cbFiltraEstoque.isSelected() || cbFiltraPreco.isSelected() || cbFiltraLoc.isSelected()){
+            sql = sql + "WHERE";
+            if(cbBuscaCodigo.isSelected()){
+                if(txtBuscaCod.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaJogo.setEnabled(true);
+                    return;
+                }
+                busca = busca + " codigo_jogo = " + txtBuscaCod.getText() + " and";
+            }
+            if(cbBuscaDesc.isSelected()){
+                if(txtBuscaDesc.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaJogo.setEnabled(true);
+                    return;
+                }
+                busca = busca + " descricao_jogo like '%" + txtBuscaDesc.getText() + "%' and";
+            }
+            if(cbBuscaNome.isSelected()){
+                if(txtBuscaNome.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaJogo.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome_jogo like '%" + txtBuscaNome.getText() + "%' and";
+            }
+            if(cbFiltraEstoque.isSelected()){
+                int op = cbbEstoque.getSelectedIndex();
+                if(op == 0)
+                    busca = busca + " em_estoque = true and";
+                else
+                    busca = busca + " em_estoque = false and";
+            }
+            if(cbFiltraLoc.isSelected()){
+                int op = cbbLoc.getSelectedIndex();
+                if(op == 0)
+                    busca = busca + " locacao = true and";
+                else
+                    busca = busca + " locacao = false and";
+            }
+            if(cbFiltraPreco.isSelected()){
+                if(txtMinPreco.getText().isEmpty() || txtMaxPreco.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaJogo.setEnabled(true);
+                    return;
+                }
+                busca = busca + " preco_jogo BETWEEN "+txtMinPreco.getText().replace(',', '.')+" AND "+txtMaxPreco.getText().replace(',', '.')+" and";
+            }
+            busca = busca.substring(0, busca.length()-3); // remove ultimo and
+            sql = sql + busca;
+        }
+        
+        try{
+            PreparedStatement stm = con.prepareStatement(sql);
+            rs = stm.executeQuery();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar busca no Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaJogo.setEnabled(true);
+            return;
+        }
+        
+        ResultadoBuscaJogo resBuscaJogo = new ResultadoBuscaJogo(this,rs);
         jp.jDesktopPane1.add(resBuscaJogo);
         Dimension d = jp.jDesktopPane1.getSize();
         resBuscaJogo.setLocation((d.width - resBuscaJogo.getSize().width) / 2, (d.height - resBuscaJogo.getSize().height) / 2);
@@ -428,6 +532,7 @@ public class BuscaJogo extends javax.swing.JInternalFrame {
     private javax.swing.JCheckBox cbExibeCodigo;
     private javax.swing.JCheckBox cbExibeDesc;
     private javax.swing.JCheckBox cbExibeEstoque;
+    private javax.swing.JCheckBox cbExibeLocacao;
     private javax.swing.JCheckBox cbExibeNome;
     private javax.swing.JCheckBox cbExibePreco;
     private javax.swing.JCheckBox cbFiltraEstoque;

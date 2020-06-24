@@ -5,6 +5,14 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,8 +22,31 @@ public class EditItem extends javax.swing.JInternalFrame {
     /**
      * Creates new form EditItem
      */
-    public EditItem() {
+    Connection con;
+    String cod;
+    ResultadoBuscaItem fonte;
+    public EditItem(String cod, ResultadoBuscaItem f) {
         initComponents();
+        fonte = f;
+        this.cod = cod;
+        String sql = "SELECT * FROM itens_cardapio WHERE codigo_item = " + cod;
+        try {
+            con = ConnectionFactory.createConnection();
+            PreparedStatement stm = con.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                txtCodItem.setText(""+rs.getString("codigo_item"));
+                txtNomeItem.setText(""+rs.getString("nome_item"));
+                txtDescItem.setText(""+rs.getString("descricao_item"));
+                txtPrecoItem.setText(""+rs.getString("preco_item"));
+                cbEstoqueItem.setSelected(rs.getBoolean("em_estoque"));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível encontrar cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(EditCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -43,6 +74,23 @@ public class EditItem extends javax.swing.JInternalFrame {
         setClosable(true);
         setIconifiable(true);
         setTitle("Editar Item");
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
 
         txtCodItem.setEditable(false);
 
@@ -72,6 +120,11 @@ public class EditItem extends javax.swing.JInternalFrame {
 
         btnEditItem.setText("Salvar");
         btnEditItem.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnEditItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditItemActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -138,6 +191,33 @@ public class EditItem extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         dispose();
     }//GEN-LAST:event_btnCancelaEditItemActionPerformed
+
+    private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(EditItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formInternalFrameClosed
+
+    private void btnEditItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditItemActionPerformed
+        // TODO add your handling code here:
+        String sql = "UPDATE itens_cardapio SET "
+                + "nome_item = '" + txtNomeItem.getText() + "',descricao_item = '"+txtDescItem.getText()+"',preco_item = "+
+                txtPrecoItem.getText().replace(',', '.')+",em_estoque = "+ cbEstoqueItem.isSelected()
+                +" WHERE codigo_item = " + txtCodItem.getText();
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } 
+        JOptionPane.showMessageDialog(null, "Item atualizado com sucesso!","Atualização",JOptionPane.INFORMATION_MESSAGE);
+        fonte.dispose();
+        dispose();
+    }//GEN-LAST:event_btnEditItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -6,6 +6,12 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,9 +23,21 @@ public class BuscaComanda extends javax.swing.JInternalFrame {
      * Creates new form BuscaComanda
      */
     JanelaPrincipal jp;
+    Connection con;
     public BuscaComanda(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+           
+            return;
+        }
     }
 
     /**
@@ -366,7 +384,12 @@ public class BuscaComanda extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(BuscaComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuBuscaComanda.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -377,6 +400,13 @@ public class BuscaComanda extends javax.swing.JInternalFrame {
 
     private void btnBuscaComandaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscaComandaActionPerformed
         // TODO add your handling code here:
+        ResultSet rs = null;
+        String colunas = " cpf_cliente,";
+        if(cbExibirCPFFunc.isSelected())
+            colunas = colunas + "cpf_funcionario,";
+        if(cbExibirCPFFunc.isSelected())
+            colunas = colunas + "cpf_funcionario,";
+        
         btnBuscaComanda.setEnabled(false);
         ResultadoBuscaComanda resBuscaComanda = new ResultadoBuscaComanda(this);
         jp.jDesktopPane1.add(resBuscaComanda);

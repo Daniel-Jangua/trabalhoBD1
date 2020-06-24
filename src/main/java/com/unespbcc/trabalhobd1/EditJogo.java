@@ -5,6 +5,14 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,8 +22,32 @@ public class EditJogo extends javax.swing.JInternalFrame {
     /**
      * Creates new form EditJogo
      */
-    public EditJogo() {
+    Connection con;
+    String cod;
+    ResultadoBuscaJogo fonte;
+    public EditJogo(String cod,ResultadoBuscaJogo f) {
         initComponents();
+        fonte = f;
+        this.cod = cod;
+        String sql = "SELECT * FROM jogo WHERE codigo_jogo = " + cod;
+        try {
+            con = ConnectionFactory.createConnection();
+            PreparedStatement stm = con.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                txtCodJogo.setText(""+rs.getString("codigo_jogo"));
+                txtNomeJogo.setText(""+rs.getString("nome_jogo"));
+                txtDescJogo.setText(""+rs.getString("descricao_jogo"));
+                txtPrecoJogo.setText(""+rs.getString("preco_jogo"));
+                cbEstoqueJogo.setSelected(rs.getBoolean("em_estoque"));
+                cbLocJogo.setSelected(rs.getBoolean("locacao"));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível encontrar cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(EditCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -44,6 +76,23 @@ public class EditJogo extends javax.swing.JInternalFrame {
         setClosable(true);
         setIconifiable(true);
         setTitle("Editar Jogo");
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
 
         jLabel1.setText("Código:");
 
@@ -80,6 +129,11 @@ public class EditJogo extends javax.swing.JInternalFrame {
 
         btnEditJogo.setText("Salvar");
         btnEditJogo.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnEditJogo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditJogoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -162,6 +216,33 @@ public class EditJogo extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         dispose();
     }//GEN-LAST:event_btnCancelaEditJogoActionPerformed
+
+    private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(EditJogo.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formInternalFrameClosed
+
+    private void btnEditJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditJogoActionPerformed
+        // TODO add your handling code here:
+        String sql = "UPDATE jogo SET "
+                + "nome_jogo = '" + txtNomeJogo.getText() + "',descricao_jogo = '"+txtDescJogo.getText()+"',preco_jogo = "+
+                txtPrecoJogo.getText().replace(',', '.')+",em_estoque = "+ cbEstoqueJogo.isSelected() +
+                ",locacao = "+ cbLocJogo.isSelected() +" WHERE codigo_jogo = " + txtCodJogo.getText();
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } 
+        JOptionPane.showMessageDialog(null, "Jogo atualizado com sucesso!","Atualização",JOptionPane.INFORMATION_MESSAGE);
+        fonte.dispose();
+        dispose();
+    }//GEN-LAST:event_btnEditJogoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

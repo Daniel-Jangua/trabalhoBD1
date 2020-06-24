@@ -6,6 +6,13 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,11 +25,34 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
      */
     
     
-    
-    public EditFuncionario(ResultadoBuscaFunc f) {
+    Connection con;
+    String cpf;
+    public EditFuncionario(String c, ResultadoBuscaFunc f) {
         initComponents();
         fonte = f;
+        cpf = c;
         //setPosicao();
+        String sql = "SELECT * FROM pessoaFunc WHERE cpf = " + cpf;
+        try {
+            con = ConnectionFactory.createConnection();
+            PreparedStatement stm = con.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                txtCPFFunc.setText(""+rs.getString("cpf"));
+                txtNomeFunc.setText(""+rs.getString("nome"));
+                txtCTPSFunc.setText(""+rs.getString("ctps"));
+                txtRuaFunc.setText(""+rs.getString("rua"));
+                txtCidadeFunc.setText(""+rs.getString("cidade"));
+                txtBairroFunc.setText(""+rs.getString("bairro"));
+                txtCEPFunc.setText(""+rs.getString("num"));
+                txtSalFunc.setText(""+rs.getString("salario"));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível encontrar cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(EditCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     //gera centralizado
     public void setPosicao() {
@@ -53,7 +83,7 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
         jLabel6 = new javax.swing.JLabel();
         txtCidadeFunc = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        txtCEPFunc = new javax.swing.JFormattedTextField();
+        txtCEPFunc = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtSalFunc = new javax.swing.JFormattedTextField();
         btnCancelaEditFunc = new javax.swing.JButton();
@@ -62,6 +92,23 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
         setClosable(true);
         setIconifiable(true);
         setTitle("Editar Funcionário");
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
 
         jLabel1.setText("Nome:");
 
@@ -93,12 +140,6 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
 
         jLabel7.setText("Número:");
 
-        try {
-            txtCEPFunc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));
-        } catch (java.text.ParseException ex) {
-            ex.printStackTrace();
-        }
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -116,7 +157,7 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
                     .addComponent(txtCidadeFunc)
                     .addComponent(txtRuaFunc, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtCEPFunc, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtCEPFunc, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -156,6 +197,11 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
 
         btnSalvaEditFunc.setText("Salvar");
         btnSalvaEditFunc.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnSalvaEditFunc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSalvaEditFuncActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -228,6 +274,44 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
         this.dispose();
     }//GEN-LAST:event_btnCancelaEditFuncActionPerformed
 
+    private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(EditFuncionario.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formInternalFrameClosed
+
+    private void btnSalvaEditFuncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvaEditFuncActionPerformed
+        // TODO add your handling code here:
+        String sql = "UPDATE pessoa SET "
+                + "nome = '" + txtNomeFunc.getText() + "',cidade = '"+txtCidadeFunc.getText()+"',rua = '"+
+                txtRuaFunc.getText()+"',bairro = '"+txtBairroFunc.getText()+"',numero_casa = "+
+                txtCEPFunc.getText() + " WHERE cpf = " + txtCPFFunc.getText();
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } 
+        sql = "UPDATE funcionario SET "+
+                "ctps = " + txtCTPSFunc.getText() + ",salario = " + txtSalFunc.getText().replace(',', '.')+" "
+                + "WHERE cpf = " + txtCPFFunc.getText();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(null, "Funcionário atualizado com sucesso!","Atualização",JOptionPane.INFORMATION_MESSAGE);
+        fonte.dispose();
+        dispose();
+    }//GEN-LAST:event_btnSalvaEditFuncActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelaEditFunc;
@@ -242,7 +326,7 @@ public class EditFuncionario extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtBairroFunc;
-    private javax.swing.JFormattedTextField txtCEPFunc;
+    private javax.swing.JTextField txtCEPFunc;
     private javax.swing.JFormattedTextField txtCPFFunc;
     private javax.swing.JFormattedTextField txtCTPSFunc;
     private javax.swing.JTextField txtCidadeFunc;

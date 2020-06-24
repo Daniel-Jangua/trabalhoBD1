@@ -6,8 +6,18 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -19,9 +29,24 @@ public class ResultadoBuscaCli extends javax.swing.JInternalFrame {
      * Creates new form ResultadoBuscaCli
      */
     BuscaCliente fonte;
-    public ResultadoBuscaCli(BuscaCliente f) {
+    ResultSet rs;
+    Connection con;
+    public ResultadoBuscaCli(BuscaCliente f, ResultSet r) {
         initComponents();
         fonte = f;
+        rs = r;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            tbResBuscaCli.setModel(buildTableModel(rs));
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -48,6 +73,11 @@ public class ResultadoBuscaCli extends javax.swing.JInternalFrame {
         jPopupMenu1.add(menuEditCli);
 
         menuExcluiCli.setText("Excluir");
+        menuExcluiCli.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuExcluiCliActionPerformed(evt);
+            }
+        });
         jPopupMenu1.add(menuExcluiCli);
 
         setClosable(true);
@@ -107,6 +137,11 @@ public class ResultadoBuscaCli extends javax.swing.JInternalFrame {
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
         // TODO add your handling code here:
         fonte.btnBuscaCli.setEnabled(true);
+        try {
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_formInternalFrameClosed
 
     private void tbResBuscaCliMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tbResBuscaCliMouseReleased
@@ -128,13 +163,56 @@ public class ResultadoBuscaCli extends javax.swing.JInternalFrame {
 
     private void menuEditCliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditCliActionPerformed
         // TODO add your handling code here:
-        EditCliente editCliente = new EditCliente();
+        
+        EditCliente editCliente = new EditCliente(tbResBuscaCli.getValueAt(tbResBuscaCli.getSelectedRow(), 0).toString(),this);
         fonte.jp.jDesktopPane1.add(editCliente);
         Dimension d = fonte.jp.jDesktopPane1.getSize();
         editCliente.setLocation((d.width - editCliente.getSize().width) / 2, (d.height - editCliente.getSize().height) / 2);
         editCliente.setVisible(true);
     }//GEN-LAST:event_menuEditCliActionPerformed
 
+    private void menuExcluiCliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExcluiCliActionPerformed
+        // TODO add your handling code here:
+        int op = JOptionPane.showConfirmDialog(fonte.jp, "Tem certeza que deseja excluir cliente?", "Atenção!", JOptionPane.OK_CANCEL_OPTION);
+        if(op == JOptionPane.CANCEL_OPTION)
+            return;
+        String sql = "DELETE FROM cliente WHERE cpf = " + tbResBuscaCli.getValueAt(tbResBuscaCli.getSelectedRow(), 0);
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            dispose();
+        }
+        JOptionPane.showMessageDialog(fonte.jp,"Cliente excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }//GEN-LAST:event_menuExcluiCliActionPerformed
+
+    public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // names of columns
+        Vector<String> columnNames = new Vector<String>();
+        int columnCount = metaData.getColumnCount();
+        for (int column = 1; column <= columnCount; column++) {
+            columnNames.add(metaData.getColumnName(column).toUpperCase());
+        }
+
+        // data of the table
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        while (rs.next()) {
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(rs.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+
+        return new DefaultTableModel(data, columnNames);
+
+    }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPopupMenu jPopupMenu1;

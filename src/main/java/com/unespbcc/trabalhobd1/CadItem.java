@@ -5,6 +5,13 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -15,9 +22,20 @@ public class CadItem extends javax.swing.JInternalFrame {
      * Creates new form CadItens
      */
     JanelaPrincipal jp;
+    Connection con;
+    
     public CadItem(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
 
     /**
@@ -87,6 +105,11 @@ public class CadItem extends javax.swing.JInternalFrame {
 
         btnCadItem.setText("Cadastrar");
         btnCadItem.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnCadItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadItemActionPerformed(evt);
+            }
+        });
 
         txtPrecoItem.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.00"))));
 
@@ -152,7 +175,12 @@ public class CadItem extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CadItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuCadItem.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -160,6 +188,28 @@ public class CadItem extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         dispose();
     }//GEN-LAST:event_btnCancelaCadItemActionPerformed
+
+    private void btnCadItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadItemActionPerformed
+        // TODO add your handling code here:
+        String sql = "INSERT INTO itens_cardapio(codigo_item,nome_item,descricao_item,preco_item,em_estoque) VALUES"
+                + " ("+txtCodItem.getText()+",'"+txtNomeItem.getText()+"','"
+                + txtDescItem.getText()+"',"+txtPrecoItem.getText().replace(',', '.')+","
+                + cbEstoqueItem.isSelected()+")";
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar a inserção!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(jp, "Cadastro realizado com sucesso!","Cadastro",JOptionPane.INFORMATION_MESSAGE);
+        txtCodItem.setText("");
+        txtNomeItem.setText("");
+        txtDescItem.setText("");
+        txtPrecoItem.setText("");
+        cbEstoqueItem.setSelected(false);
+    }//GEN-LAST:event_btnCadItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

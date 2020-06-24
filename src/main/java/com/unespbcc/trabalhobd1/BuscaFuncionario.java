@@ -6,6 +6,13 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,9 +24,21 @@ public class BuscaFuncionario extends javax.swing.JInternalFrame {
      * Creates new form BuscaFuncionario
      */
     public JanelaPrincipal jp;
+    Connection con;
     public BuscaFuncionario(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+           
+            return;
+        }
     }
 
     /**
@@ -214,12 +233,12 @@ public class BuscaFuncionario extends javax.swing.JInternalFrame {
         txtSalMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.00"))));
         txtSalMax.setEnabled(false);
 
-        jLabel1.setText("Mínimo:");
+        jLabel1.setText("Máximo:");
 
         txtSalMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("###0.00"))));
         txtSalMin.setEnabled(false);
 
-        jLabel2.setText("Máximo:");
+        jLabel2.setText("Mínimo:");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -362,7 +381,12 @@ public class BuscaFuncionario extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(BuscaFuncionario.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuBuscaFunc.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -416,7 +440,82 @@ public class BuscaFuncionario extends javax.swing.JInternalFrame {
 
     private void btnBuscaFuncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscaFuncActionPerformed
         // TODO add your handling code here:
-        ResultadoBuscaFunc resBuscaFunc = new ResultadoBuscaFunc(this);
+        
+        ResultSet rs = null;
+        String colunas = "cpf as CPF,";
+        if(cbExibirCTPS.isSelected())
+            colunas = colunas + "ctps as CTPS,";
+        if(cbExibirNome.isSelected())
+            colunas = colunas + "nome as Nome,";
+        if(cbExibirRua.isSelected())
+            colunas = colunas + "rua as Rua,";
+        if(cbExibirBairro.isSelected())
+            colunas = colunas + "bairro as Bairro,";
+        if(cbExibirCidade.isSelected())
+            colunas = colunas + "cidade as Cidade,";
+        if(cbExibirCEP.isSelected())
+            colunas = colunas + "num as Número,";
+        if(cbExibirSalario.isSelected())
+            colunas = colunas + "salario as Salário,";
+        colunas = colunas.substring(0, colunas.length()-1); // elimina a ultima virgula
+        String sql = "SELECT " + colunas + " FROM pessoaFunc ";
+        String busca = "";
+        if(cbBuscarCPF.isSelected() || cbBuscarCTPS.isSelected() || cbBuscarNome.isSelected() || cbBuscarCidade.isSelected() || cbFiltrarSalario.isSelected()){
+            sql = sql + "WHERE";
+            if(cbBuscarCPF.isSelected()){
+                if(txtBuscaCPF.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaFunc.setEnabled(true);
+                    return;
+                }
+                busca = busca + " cpf = " + txtBuscaCPF.getText() + " and";
+            }
+            if(cbBuscarCTPS.isSelected()){
+                if(txtBuscaCTPS.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaFunc.setEnabled(true);
+                    return;
+                }
+                busca = busca + " ctps = " + txtBuscaCTPS.getText() + " and";
+            }
+            if(cbBuscarNome.isSelected()){
+                if(txtBuscaNome.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaFunc.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome like '%" + txtBuscaNome.getText() + "%' and";
+            }
+            if(cbBuscarCidade.isSelected()){
+                if(txtBuscaCidade.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaFunc.setEnabled(true);
+                    return;
+                }
+                busca = busca + " cidade like '%" + txtBuscaCidade.getText() + "%' and";
+            }
+            if(cbFiltrarSalario.isSelected()){
+                if(txtSalMin.getText().isEmpty() || txtSalMax.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaFunc.setEnabled(true);
+                    return;
+                }
+                busca = busca + " salario BETWEEN "+txtSalMin.getText().replace(',', '.')+" AND "+txtSalMax.getText().replace(',', '.')+" and";
+            }
+            busca = busca.substring(0, busca.length()-3); // remove ultimo and
+            sql = sql + busca;
+        }
+        
+        try{
+            PreparedStatement stm = con.prepareStatement(sql);
+            rs = stm.executeQuery();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar busca no Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaFunc.setEnabled(true);
+            return;
+        }
+        
+        ResultadoBuscaFunc resBuscaFunc = new ResultadoBuscaFunc(this,rs);
         jp.jDesktopPane1.add(resBuscaFunc);
         Dimension d = jp.jDesktopPane1.getSize();
         resBuscaFunc.setLocation((d.width - resBuscaFunc.getSize().width) / 2, (d.height - resBuscaFunc.getSize().height) / 2);

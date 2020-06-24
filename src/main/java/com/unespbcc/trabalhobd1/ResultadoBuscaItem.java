@@ -6,8 +6,18 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -19,9 +29,25 @@ public class ResultadoBuscaItem extends javax.swing.JInternalFrame {
      * Creates new form ResultadoBuscaItem
      */
     BuscaItem fonte;
-    public ResultadoBuscaItem(BuscaItem f) {
+    ResultSet rs;
+    Connection con;
+    public ResultadoBuscaItem(BuscaItem f, ResultSet r) {
         initComponents();
         fonte = f;
+        rs = r;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try {
+            tbResBuscaItem.setModel(buildTableModel(rs));
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -48,6 +74,11 @@ public class ResultadoBuscaItem extends javax.swing.JInternalFrame {
         jPopupMenu1.add(menuEditaItem);
 
         menuExcluiItem.setText("Excluir");
+        menuExcluiItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuExcluiItemActionPerformed(evt);
+            }
+        });
         jPopupMenu1.add(menuExcluiItem);
 
         setClosable(true);
@@ -121,19 +152,69 @@ public class ResultadoBuscaItem extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_tbResBuscaItemMouseReleased
 
+    public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // names of columns
+        Vector<String> columnNames = new Vector<String>();
+        int columnCount = metaData.getColumnCount();
+        for (int column = 1; column <= columnCount; column++) {
+            columnNames.add(metaData.getColumnName(column).toUpperCase());
+        }
+
+        // data of the table
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        while (rs.next()) {
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(rs.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+
+        return new DefaultTableModel(data, columnNames);
+
+    }
+    
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnBuscaItem.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
     private void menuEditaItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditaItemActionPerformed
         // TODO add your handling code here:
-        EditItem editItem = new EditItem();
+        
+        
+        EditItem editItem = new EditItem(tbResBuscaItem.getValueAt(tbResBuscaItem.getSelectedRow(), 0).toString(),this);
         fonte.jp.jDesktopPane1.add(editItem);
         Dimension d = fonte.jp.jDesktopPane1.getSize();
         editItem.setLocation((d.width - editItem.getSize().width) / 2, (d.height - editItem.getSize().height) / 2);
         editItem.setVisible(true);
     }//GEN-LAST:event_menuEditaItemActionPerformed
+
+    private void menuExcluiItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExcluiItemActionPerformed
+        // TODO add your handling code here:
+        int op = JOptionPane.showConfirmDialog(fonte.jp, "Tem certeza que deseja excluir jogo?", "Atenção!", JOptionPane.OK_CANCEL_OPTION);
+        if(op == JOptionPane.CANCEL_OPTION)
+            return;
+        String sql = "DELETE FROM itens_cardapio WHERE codigo_item = " + tbResBuscaItem.getValueAt(tbResBuscaItem.getSelectedRow(), 0);
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir item!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            dispose();
+            return;
+        }
+        JOptionPane.showMessageDialog(fonte.jp,"Item excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }//GEN-LAST:event_menuExcluiItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

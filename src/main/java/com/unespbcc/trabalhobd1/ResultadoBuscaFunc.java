@@ -6,8 +6,18 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -19,9 +29,25 @@ public class ResultadoBuscaFunc extends javax.swing.JInternalFrame {
      * Creates new form ResultadoBuscaFunc
      */
     BuscaFuncionario fonte;
-    public ResultadoBuscaFunc(BuscaFuncionario f) {
+    ResultSet rs;
+    Connection con;
+    public ResultadoBuscaFunc(BuscaFuncionario f, ResultSet r) {
         initComponents();
         fonte = f;
+        rs = r;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            tbResBuscaFunc.setModel(buildTableModel(rs));
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }
 
     /**
@@ -52,6 +78,11 @@ public class ResultadoBuscaFunc extends javax.swing.JInternalFrame {
         jPopupMenu1.add(menuEditaFunc);
 
         menuExcluiFunc.setText("Excluir");
+        menuExcluiFunc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuExcluiFuncActionPerformed(evt);
+            }
+        });
         jPopupMenu1.add(menuExcluiFunc);
 
         setClosable(true);
@@ -109,7 +140,12 @@ public class ResultadoBuscaFunc extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaFunc.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnBuscaFunc.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -133,14 +169,55 @@ public class ResultadoBuscaFunc extends javax.swing.JInternalFrame {
     private void menuEditaFuncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditaFuncActionPerformed
         // TODO add your handling code here:
         //selecionar dados da tupla selecionada
-        EditFuncionario editFunc = new EditFuncionario(this);
+        EditFuncionario editFunc = new EditFuncionario(tbResBuscaFunc.getValueAt(tbResBuscaFunc.getSelectedRow(), 0).toString(),this);
         fonte.jp.jDesktopPane1.add(editFunc);
         Dimension d = fonte.jp.jDesktopPane1.getSize();
         editFunc.setLocation((d.width - editFunc.getSize().width) / 2, (d.height - editFunc.getSize().height) / 2);
         editFunc.setVisible(true);
     }//GEN-LAST:event_menuEditaFuncActionPerformed
 
+    private void menuExcluiFuncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuExcluiFuncActionPerformed
+        // TODO add your handling code here:
+        int op = JOptionPane.showConfirmDialog(fonte.jp, "Tem certeza que deseja excluir funcionário?", "Atenção!", JOptionPane.OK_CANCEL_OPTION);
+        if(op == JOptionPane.CANCEL_OPTION)
+            return;
+        String sql = "DELETE FROM funcionario WHERE cpf = " + tbResBuscaFunc.getValueAt(tbResBuscaFunc.getSelectedRow(), 0);
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir funcionário!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            dispose();
+        }
+        JOptionPane.showMessageDialog(fonte.jp,"Funcionário excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }//GEN-LAST:event_menuExcluiFuncActionPerformed
 
+    public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // names of columns
+        Vector<String> columnNames = new Vector<String>();
+        int columnCount = metaData.getColumnCount();
+        for (int column = 1; column <= columnCount; column++) {
+            columnNames.add(metaData.getColumnName(column).toUpperCase());
+        }
+
+        // data of the table
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        while (rs.next()) {
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(rs.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+
+        return new DefaultTableModel(data, columnNames);
+
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;

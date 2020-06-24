@@ -6,6 +6,13 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,9 +24,21 @@ public class BuscaItem extends javax.swing.JInternalFrame {
      * Creates new form BuscaItem
      */
     JanelaPrincipal jp;
+    Connection con;
     public BuscaItem(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+           
+            return;
+        }
     }
 
     /**
@@ -336,7 +355,12 @@ public class BuscaItem extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(BuscaItem.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuBuscaItem.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -394,7 +418,74 @@ public class BuscaItem extends javax.swing.JInternalFrame {
 
     private void btnBuscaItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscaItemActionPerformed
         // TODO add your handling code here:
-        ResultadoBuscaItem resBuscaItem = new ResultadoBuscaItem(this);
+        ResultSet rs = null;
+        String colunas = " codigo_item,";
+        if(cbExibeNome.isSelected())
+            colunas = colunas + "nome_item,";
+        if(cbExibeDesc.isSelected())
+            colunas = colunas + "descricao_item,";
+        if(cbExibeEstoque.isSelected())
+            colunas = colunas + "em_estoque,";
+        if(cbExibePreco.isSelected())
+            colunas = colunas + "preco_item,";
+        colunas = colunas.substring(0, colunas.length()-1);
+        String sql = "SELECT " + colunas + " FROM itens_cardapio ";
+        String busca = "";
+        if(cbBuscaCod.isSelected() || cbBuscaDesc.isSelected() || cbBuscaNome.isSelected() || cbFiltraEstoque.isSelected() || cbFiltraPreco.isSelected()){
+            sql = sql + "WHERE";
+            if(cbBuscaCod.isSelected()){
+                if(txtBuscaCod.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaItem.setEnabled(true);
+                    return;
+                }
+                busca = busca + " codigo_item = " + txtBuscaCod.getText() + " and";
+            }
+            if(cbBuscaNome.isSelected()){
+                if(txtBuscaNome.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaItem.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome_item = like '%" + txtBuscaNome.getText() + "%' and";
+            }
+            if(cbBuscaDesc.isSelected()){
+                if(txtBuscaDesc.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaItem.setEnabled(true);
+                    return;
+                }
+                busca = busca + " descricao_item like '%" + txtBuscaDesc.getText() + "%' and";
+            }
+            if(cbFiltraPreco.isSelected()){
+                if(txtMinPreco.getText().isEmpty() || txtMaxPreco.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaItem.setEnabled(true);
+                    return;
+                }
+                busca = busca + " preco_item BETWEEN "+txtMinPreco.getText().replace(',', '.')+" AND "+txtMaxPreco.getText().replace(',', '.')+" and";
+            }
+            if(cbFiltraEstoque.isSelected()){
+                int op = cbbEstoque.getSelectedIndex();
+                if(op == 0)
+                    busca = busca + " em_estoque = true and";
+                else
+                    busca = busca + " em_estoque = false and";
+            }
+            busca = busca.substring(0, busca.length()-3); // remove ultimo and
+            sql = sql + busca;
+        }
+        
+        try{
+            PreparedStatement stm = con.prepareStatement(sql);
+            rs = stm.executeQuery();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar busca no Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaItem.setEnabled(true);
+            return;
+        }
+        
+        ResultadoBuscaItem resBuscaItem = new ResultadoBuscaItem(this,rs);
         jp.jDesktopPane1.add(resBuscaItem);
         Dimension d = jp.jDesktopPane1.getSize();
         resBuscaItem.setLocation((d.width - resBuscaItem.getSize().width) / 2, (d.height - resBuscaItem.getSize().height) / 2);

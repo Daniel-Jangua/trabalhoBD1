@@ -104,7 +104,7 @@
                   <Component id="btnCancelaCadFunc" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnCadFunc" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="80" max="32767" attributes="0"/>
+              <EmptySpace pref="77" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -157,7 +157,7 @@
                       <Component id="txtCidadeFunc" max="32767" attributes="0"/>
                       <Component id="txtRuaFunc" alignment="1" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
-                          <Component id="txtCEPFunc" min="-2" pref="190" max="-2" attributes="0"/>
+                          <Component id="txtCEPFunc" min="-2" pref="181" max="-2" attributes="0"/>
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
@@ -188,7 +188,7 @@
                       <Component id="jLabel7" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="txtCEPFunc" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="14" max="32767" attributes="0"/>
+                  <EmptySpace pref="17" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -220,12 +220,7 @@
         </Component>
         <Component class="javax.swing.JTextField" name="txtCidadeFunc">
         </Component>
-        <Component class="javax.swing.JFormattedTextField" name="txtCEPFunc">
-          <Properties>
-            <Property name="formatterFactory" type="javax.swing.JFormattedTextField$AbstractFormatterFactory" editor="org.netbeans.modules.form.editors.AbstractFormatterFactoryEditor" preCode="try {" postCode="} catch (java.text.ParseException ex) {&#xa;ex.printStackTrace();&#xa;}">
-              <Format format="########" subtype="-1" type="5"/>
-            </Property>
-          </Properties>
+        <Component class="javax.swing.JTextField" name="txtCEPFunc">
         </Component>
       </SubComponents>
     </Container>
@@ -252,6 +247,9 @@
           <Dimension value="[100, 23]"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCadFuncActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JFormattedTextField" name="txtCPFFunc">
       <Properties>

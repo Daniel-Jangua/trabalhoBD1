@@ -6,16 +6,33 @@
 
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
  */
 public class CadFuncionario extends javax.swing.JInternalFrame {
     JanelaPrincipal jp;
+    Connection con;
     /** Creates new form CadFuncionario */
     public CadFuncionario(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
 
     /** This method is called from within the constructor to
@@ -39,7 +56,7 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
         txtRuaFunc = new javax.swing.JTextField();
         txtBairroFunc = new javax.swing.JTextField();
         txtCidadeFunc = new javax.swing.JTextField();
-        txtCEPFunc = new javax.swing.JFormattedTextField();
+        txtCEPFunc = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         btnCancelaCadFunc = new javax.swing.JButton();
         btnCadFunc = new javax.swing.JButton();
@@ -84,12 +101,6 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
 
         jLabel7.setText("Número:");
 
-        try {
-            txtCEPFunc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));
-        } catch (java.text.ParseException ex) {
-            ex.printStackTrace();
-        }
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -107,7 +118,7 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
                     .addComponent(txtCidadeFunc)
                     .addComponent(txtRuaFunc, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtCEPFunc, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtCEPFunc, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -130,7 +141,7 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtCEPFunc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         jLabel8.setText("Salário:");
@@ -145,6 +156,11 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
 
         btnCadFunc.setText("Cadastrar");
         btnCadFunc.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnCadFunc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCadFuncActionPerformed(evt);
+            }
+        });
 
         try {
             txtCPFFunc.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("###########")));
@@ -220,14 +236,19 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancelaCadFunc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCadFunc, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(80, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         setBounds(0, 0, 500, 420);
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CadFuncionario.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuCadFunc.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -235,6 +256,40 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         this.dispose();
     }//GEN-LAST:event_btnCancelaCadFuncActionPerformed
+
+    private void btnCadFuncActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadFuncActionPerformed
+        // TODO add your handling code here:
+        String sql = "INSERT INTO pessoa(cpf,nome,rua,bairro,cidade,numero_casa) VALUES"
+                + " ("+txtCPFFunc.getText()+",'"+txtNomeFunc.getText()+"','"
+                + txtRuaFunc.getText()+"','"+txtBairroFunc.getText()+"','"
+                + txtCidadeFunc.getText()+"',"+txtCEPFunc.getText()+")";
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar a inserção!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        sql = "INSERT INTO funcionario(cpf,ctps,salario) VALUES"
+                + " ("+txtCPFFunc.getText()+","+txtCTPSFunc.getText()+","+txtSalFunc.getText().replace(',', '.')+")";
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar a inserção!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(jp, "Cadastro realizado com sucesso!","Cadastro",JOptionPane.INFORMATION_MESSAGE);
+        txtCPFFunc.setText("");
+        txtCTPSFunc.setText("");
+        txtNomeFunc.setText("");
+        txtRuaFunc.setText("");
+        txtBairroFunc.setText("");
+        txtCidadeFunc.setText("");
+        txtCEPFunc.setText("");
+        txtSalFunc.setText("");
+    }//GEN-LAST:event_btnCadFuncActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -250,7 +305,7 @@ public class CadFuncionario extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtBairroFunc;
-    private javax.swing.JFormattedTextField txtCEPFunc;
+    private javax.swing.JTextField txtCEPFunc;
     private javax.swing.JFormattedTextField txtCPFFunc;
     private javax.swing.JFormattedTextField txtCTPSFunc;
     private javax.swing.JTextField txtCidadeFunc;

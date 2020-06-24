@@ -5,6 +5,14 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,8 +22,34 @@ public class EditCliente extends javax.swing.JInternalFrame {
     /**
      * Creates new form EditCliente
      */
-    public EditCliente() {
+    String cpf;
+    Connection con;
+    ResultadoBuscaCli fonte;
+    public EditCliente(String cpf,ResultadoBuscaCli f) {
         initComponents();
+        this.cpf = cpf;
+        fonte = f;
+        String sql = "SELECT * FROM pessoaCliente WHERE cpf = " + cpf;
+        try {
+            con = ConnectionFactory.createConnection();
+            PreparedStatement stm = con.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                txtCPFCli.setText(""+rs.getString("cpf"));
+                txtNomeCli.setText(""+rs.getString("nome"));
+                txtRGCli.setText(""+rs.getString("rg"));
+                txtRuaCli.setText(""+rs.getString("rua"));
+                txtCidadeCli.setText(""+rs.getString("cidade"));
+                txtBairroCli.setText(""+rs.getString("bairro"));
+                txtCEPCli.setText(""+rs.getString("num"));
+                txtTelCli.setText(""+rs.getString("telefone"));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível encontrar cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(EditCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -41,7 +75,7 @@ public class EditCliente extends javax.swing.JInternalFrame {
         txtCidadeCli = new javax.swing.JTextField();
         txtBairroCli = new javax.swing.JTextField();
         txtRuaCli = new javax.swing.JTextField();
-        txtCEPCli = new javax.swing.JFormattedTextField();
+        txtCEPCli = new javax.swing.JTextField();
         jLabel8 = new javax.swing.JLabel();
         txtTelCli = new javax.swing.JTextField();
         btnCancelaEditCli = new javax.swing.JButton();
@@ -50,6 +84,23 @@ public class EditCliente extends javax.swing.JInternalFrame {
         setClosable(true);
         setIconifiable(true);
         setTitle("Editar Cliente");
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
 
         jLabel1.setText("Nome:");
 
@@ -80,12 +131,6 @@ public class EditCliente extends javax.swing.JInternalFrame {
 
         jLabel7.setText("Número:");
 
-        try {
-            txtCEPCli.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("########")));
-        } catch (java.text.ParseException ex) {
-            ex.printStackTrace();
-        }
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -103,7 +148,7 @@ public class EditCliente extends javax.swing.JInternalFrame {
                     .addComponent(txtBairroCli)
                     .addComponent(txtCidadeCli)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtCEPCli, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtCEPCli, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -126,7 +171,7 @@ public class EditCliente extends javax.swing.JInternalFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtCEPCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         jLabel8.setText("Telefone:");
@@ -206,7 +251,7 @@ public class EditCliente extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCancelaEditCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSalvaEditCli, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(80, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
 
         setBounds(0, 0, 500, 420);
@@ -219,7 +264,41 @@ public class EditCliente extends javax.swing.JInternalFrame {
 
     private void btnSalvaEditCliActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSalvaEditCliActionPerformed
         // TODO add your handling code here:
+        String sql = "UPDATE pessoa SET "
+                + "nome = '" + txtNomeCli.getText() + "',cidade = '"+txtCidadeCli.getText()+"',rua = '"+
+                txtRuaCli.getText()+"',bairro = '"+txtBairroCli.getText()+"',numero_casa = "+
+                txtCEPCli.getText() + " WHERE cpf = " + txtCPFCli.getText();
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        sql = "UPDATE cliente SET "+
+                "rg = " + txtRGCli.getText() + ",telefone = '" + txtTelCli.getText()+"' "
+                + "WHERE cpf = " + txtCPFCli.getText();
+        PreparedStatement stm;
+        try {
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(null, "Cliente atualizado com sucesso!","Atualização",JOptionPane.INFORMATION_MESSAGE);
+        fonte.dispose();
+        dispose();
     }//GEN-LAST:event_btnSalvaEditCliActionPerformed
+
+    private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(EditCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formInternalFrameClosed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -235,7 +314,7 @@ public class EditCliente extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtBairroCli;
-    private javax.swing.JFormattedTextField txtCEPCli;
+    private javax.swing.JTextField txtCEPCli;
     private javax.swing.JFormattedTextField txtCPFCli;
     private javax.swing.JTextField txtCidadeCli;
     private javax.swing.JTextField txtNomeCli;
