@@ -4,10 +4,17 @@
  * and open the template in the editor.
  */
 package com.unespbcc.trabalhobd1;
-
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JPopupMenu;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -18,10 +25,26 @@ public class ResultadoBuscaComanda extends javax.swing.JInternalFrame {
     /**
      * Creates new form ResultadoBuscaComanda
      */
+    ResultSet rs;
+    Connection con;
     BuscaComanda fonte;
-    public ResultadoBuscaComanda(BuscaComanda f) {
+    public ResultadoBuscaComanda(BuscaComanda f,ResultSet r) {
         initComponents();
         fonte = f;
+        rs = r;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try {
+            tbResBuscaComanda.setModel(buildTableModel(rs));
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -119,7 +142,7 @@ public class ResultadoBuscaComanda extends javax.swing.JInternalFrame {
 
     private void menuEditaComandaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuEditaComandaActionPerformed
         // TODO add your handling code here:
-        GerenciaComanda gerenciaComanda = new GerenciaComanda(fonte.jp);
+        GerenciaComanda gerenciaComanda = new GerenciaComanda(tbResBuscaComanda.getValueAt(tbResBuscaComanda.getSelectedRow(), 0).toString(),fonte.jp);
         fonte.jp.jDesktopPane1.add(gerenciaComanda);
         Dimension d = fonte.jp.jDesktopPane1.getSize();
         gerenciaComanda.setLocation((d.width - gerenciaComanda.getSize().width) / 2, (d.height - gerenciaComanda.getSize().height) / 2);
@@ -127,10 +150,39 @@ public class ResultadoBuscaComanda extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_menuEditaComandaActionPerformed
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnBuscaComanda.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
+    public static DefaultTableModel buildTableModel(ResultSet rs) throws SQLException {
+
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // names of columns
+        Vector<String> columnNames = new Vector<String>();
+        int columnCount = metaData.getColumnCount();
+        for (int column = 1; column <= columnCount; column++) {
+            columnNames.add(metaData.getColumnName(column).toUpperCase());
+        }
+
+        // data of the table
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        while (rs.next()) {
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(rs.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+
+        return new DefaultTableModel(data, columnNames);
+
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPopupMenu jPopupMenu1;

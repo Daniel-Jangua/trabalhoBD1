@@ -185,7 +185,7 @@ public class ResultadoBuscaJogo extends javax.swing.JInternalFrame {
             stm.executeUpdate();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir jogo!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
-            dispose();
+            //dispose();
             return;
         }
         JOptionPane.showMessageDialog(fonte.jp,"Jogo excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);

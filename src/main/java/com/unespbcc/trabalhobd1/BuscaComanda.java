@@ -7,6 +7,7 @@ package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -90,6 +91,7 @@ public class BuscaComanda extends javax.swing.JInternalFrame {
                 formInternalFrameClosed(evt);
             }
             public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosing(evt);
             }
             public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
             }
@@ -401,14 +403,86 @@ public class BuscaComanda extends javax.swing.JInternalFrame {
     private void btnBuscaComandaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBuscaComandaActionPerformed
         // TODO add your handling code here:
         ResultSet rs = null;
-        String colunas = " cpf_cliente,";
+        String colunas = " cpf_cliente,nome_cliente,";
         if(cbExibirCPFFunc.isSelected())
-            colunas = colunas + "cpf_funcionario,";
-        if(cbExibirCPFFunc.isSelected())
-            colunas = colunas + "cpf_funcionario,";
+            colunas = colunas + "cpf_funcionario,nome_funcionario,";
+        if(cbExibirCodJogo.isSelected())
+            colunas = colunas + "cod_jogo_alugado,";
+        if(cbExibirNomeJogo.isSelected())
+            colunas = colunas + "nome_jogo,";
+        if(cbExibirVal.isSelected())
+            colunas = colunas + "valor,";
+        colunas = colunas + "data_hora_comanda,";
+        
+        colunas = colunas.substring(0, colunas.length()-1);
+        String sql = "SELECT " + colunas + " FROM pessoaComanda ";
+        String busca = "";
+        
+        if(cbBuscaCPFCli.isSelected() || cbBuscaCPFFunc.isSelected() || cbBuscaNomeFunc.isSelected() || cbBuscaNomeJogo.isSelected() || cbBuscaNomeCli.isSelected() || cbFiltrarVal.isSelected()){
+            sql = sql + "WHERE";
+            if(cbBuscaCPFCli.isSelected()){
+                if(txtBuscaCPFCli.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaComanda.setEnabled(true);
+                    return;
+                }
+                busca = busca + " cpf_cliente = " + txtBuscaCPFCli.getText() + " and";
+            }
+            if(cbBuscaCPFFunc.isSelected()){
+                if(txtBuscaCPFFunc.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaComanda.setEnabled(true);
+                    return;
+                }
+                busca = busca + " cpf_funcionario = " + txtBuscaCPFFunc.getText() + " and";
+            }
+            if(cbBuscaNomeCli.isSelected()){
+                if(txtBuscaNomeCli.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaComanda.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome_cliente like '%" + txtBuscaNomeCli.getText() + "%' and";
+            }
+            if(cbBuscaNomeFunc.isSelected()){
+                if(txtBuscaNomeFunc.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaComanda.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome_funcionario like '%" + txtBuscaNomeFunc.getText() + "%' and";
+            }
+            if(cbBuscaNomeJogo.isSelected()){
+                if(txtBuscaNomeJogo.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaComanda.setEnabled(true);
+                    return;
+                }
+                busca = busca + " nome_jogo like '%" + txtBuscaNomeJogo.getText() + "%' and";
+            }
+            if(cbFiltrarVal.isSelected()){
+                if(txtMinVal.getText().isEmpty() || txtMaxVal.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(jp, "Preencha todos os campos!","Atenção",JOptionPane.WARNING_MESSAGE);
+                    btnBuscaComanda.setEnabled(true);
+                    return;
+                }
+                busca = busca + " valor BETWEEN "+txtMinVal.getText().replace(',', '.')+" AND "+txtMaxVal.getText().replace(',', '.')+" and";
+            }
+            busca = busca.substring(0, busca.length()-3); // remove ultimo and
+            sql = sql + busca;
+        }
+        
+        try{
+            PreparedStatement stm = con.prepareStatement(sql);
+            rs = stm.executeQuery();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível realizar busca no Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            btnBuscaComanda.setEnabled(true);
+            return;
+        }
         
         btnBuscaComanda.setEnabled(false);
-        ResultadoBuscaComanda resBuscaComanda = new ResultadoBuscaComanda(this);
+        ResultadoBuscaComanda resBuscaComanda = new ResultadoBuscaComanda(this,rs);
         jp.jDesktopPane1.add(resBuscaComanda);
         Dimension d = jp.jDesktopPane1.getSize();
         resBuscaComanda.setLocation((d.width - resBuscaComanda.getSize().width) / 2, (d.height - resBuscaComanda.getSize().height) / 2);
@@ -465,6 +539,10 @@ public class BuscaComanda extends javax.swing.JInternalFrame {
             txtMaxVal.setEnabled(false);
         }
     }//GEN-LAST:event_cbFiltrarValStateChanged
+
+    private void formInternalFrameClosing(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosing
+        // TODO add your handling code here:
+    }//GEN-LAST:event_formInternalFrameClosing
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

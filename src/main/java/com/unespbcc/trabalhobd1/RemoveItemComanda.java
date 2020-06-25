@@ -5,6 +5,15 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.awt.Dimension;
+import java.beans.PropertyVetoException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -15,9 +24,19 @@ public class RemoveItemComanda extends javax.swing.JInternalFrame {
      * Creates new form RemoveItem
      */
     GerenciaComanda fonte;
-    public RemoveItemComanda(GerenciaComanda f) {
+    String cpf;
+    Connection con;
+    public RemoveItemComanda(GerenciaComanda f, String cpf) {
         initComponents();
         fonte = f;
+        this.cpf = cpf;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -66,6 +85,11 @@ public class RemoveItemComanda extends javax.swing.JInternalFrame {
 
         btnRemoveItem.setText("Remover");
         btnRemoveItem.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnRemoveItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveItemActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -107,9 +131,42 @@ public class RemoveItemComanda extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnCancelaRemoveItemActionPerformed
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(RemoveItemComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnRemoveItem.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
+
+    private void btnRemoveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveItemActionPerformed
+        // TODO add your handling code here:
+        String sql = "DELETE FROM comanda_consome_itens WHERE cpf_cliente = "+cpf+" AND codigo = "+txtCodItem.getText();
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível realizar remover o item!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(fonte.jp, "Item removido com sucesso!","Remoção",JOptionPane.INFORMATION_MESSAGE);
+        txtCodItem.setText("");
+        
+        GerenciaComanda gerenciaComanda = new GerenciaComanda(cpf,fonte.jp);
+        fonte.jp.jDesktopPane1.add(gerenciaComanda);
+        Dimension d = fonte.jp.jDesktopPane1.getSize();
+        gerenciaComanda.setLocation((d.width - gerenciaComanda.getSize().width) / 2, (d.height - gerenciaComanda.getSize().height) / 2);
+        gerenciaComanda.setVisible(true);
+        fonte.dispose();
+        this.moveToFront();
+        try {
+            this.setSelected(true);
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(AddItemComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        fonte = gerenciaComanda;
+    }//GEN-LAST:event_btnRemoveItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

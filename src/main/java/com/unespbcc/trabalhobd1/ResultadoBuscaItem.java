@@ -209,7 +209,7 @@ public class ResultadoBuscaItem extends javax.swing.JInternalFrame {
             stm.executeUpdate();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir item!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
-            dispose();
+            //dispose();
             return;
         }
         JOptionPane.showMessageDialog(fonte.jp,"Item excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);

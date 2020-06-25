@@ -45,3 +45,15 @@ values
 (888888888, 'Sabor nacho', true, 'Doritos', 3.50),
 (999999999, 'Água mineral sem gás 500ml', true, 'Água', 2.00);
 
+insert into comanda(cpf_funcionario, cpf_cliente, cod_jogo_alugado)
+values
+(45200790808,16161616161,null),
+(45200790808,10101010101,000000000);
+
+insert into comanda_compra_jogos(cpf_cliente,codigo,quantidade)
+values
+(16161616161,333333333,2);
+
+insert into comanda_consome_itens(cpf_cliente,codigo,quantidade)
+values
+(16161616161,555555555,1);

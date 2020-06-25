@@ -6,6 +6,12 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -17,9 +23,19 @@ public class CadComanda extends javax.swing.JInternalFrame {
      * Creates new form CadComanda
      */
     JanelaPrincipal jp;
+    Connection con;
     public CadComanda(JanelaPrincipal j) {
         initComponents();
         jp = j;
+        try{
+            con = ConnectionFactory.createConnection();
+        }catch(SQLException ex){
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível conectar ao Banco de Dados!\n+"+ex.toString(), "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
     }
 
     /**
@@ -133,7 +149,12 @@ public class CadComanda extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(CadComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
         jp.menuCadComanda.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -144,7 +165,17 @@ public class CadComanda extends javax.swing.JInternalFrame {
 
     private void btnCriaComandaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCriaComandaActionPerformed
         //TODO: Verificar dados e fazer insert
-        GerenciaComanda gerenciaComanda = new GerenciaComanda(jp);
+        String sql = "INSERT INTO comanda(cpf_cliente,cpf_funcionario)"
+                + " VALUES ("+txtCPFCli.getText()+","+txtCPFFunc.getText()+")";
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível criar a comanda!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(jp, "Comanda criada com sucesso!","Criação",JOptionPane.INFORMATION_MESSAGE);
+        GerenciaComanda gerenciaComanda = new GerenciaComanda(txtCPFCli.getText(),jp);
         jp.jDesktopPane1.add(gerenciaComanda);
         Dimension d = jp.jDesktopPane1.getSize();
         gerenciaComanda.setLocation((d.width - gerenciaComanda.getSize().width) / 2, (d.height - gerenciaComanda.getSize().height) / 2);

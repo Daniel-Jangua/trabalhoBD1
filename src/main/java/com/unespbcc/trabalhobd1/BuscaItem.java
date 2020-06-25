@@ -447,7 +447,7 @@ public class BuscaItem extends javax.swing.JInternalFrame {
                     btnBuscaItem.setEnabled(true);
                     return;
                 }
-                busca = busca + " nome_item = like '%" + txtBuscaNome.getText() + "%' and";
+                busca = busca + " nome_item like '%" + txtBuscaNome.getText() + "%' and";
             }
             if(cbBuscaDesc.isSelected()){
                 if(txtBuscaDesc.getText().isEmpty()){

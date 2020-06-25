@@ -5,6 +5,15 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.awt.Dimension;
+import java.beans.PropertyVetoException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,10 +23,20 @@ public class AddItemComanda extends javax.swing.JInternalFrame {
     /**
      * Creates new form AddItemComanda
      */
+    String cpf;
     GerenciaComanda fonte;
-    public AddItemComanda(GerenciaComanda f) {
+    Connection con;
+    public AddItemComanda(GerenciaComanda f,String cpf) {
         initComponents();
         fonte = f;
+        this.cpf = cpf;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -72,6 +91,11 @@ public class AddItemComanda extends javax.swing.JInternalFrame {
 
         btnAddItem.setText("Adicionar");
         btnAddItem.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnAddItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddItemActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -120,7 +144,12 @@ public class AddItemComanda extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(AddItemComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnAddItem.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
 
@@ -128,6 +157,36 @@ public class AddItemComanda extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
         dispose();
     }//GEN-LAST:event_btnCancelaAddItemActionPerformed
+
+    private void btnAddItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemActionPerformed
+        // TODO add your handling code here:
+        String sql = "INSERT INTO comanda_consome_itens(cpf_cliente,codigo,quantidade) "
+                + "VALUES ("+cpf+","+txtCodItem.getText()+","+spinQtdItem.getValue()+")";
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível adicionar item!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(fonte.jp, "Item adicionado com sucesso!","Cadastro",JOptionPane.INFORMATION_MESSAGE);
+        txtCodItem.setText("");
+        spinQtdItem.setValue(1);
+        
+        GerenciaComanda gerenciaComanda = new GerenciaComanda(cpf,fonte.jp);
+        fonte.jp.jDesktopPane1.add(gerenciaComanda);
+        Dimension d = fonte.jp.jDesktopPane1.getSize();
+        gerenciaComanda.setLocation((d.width - gerenciaComanda.getSize().width) / 2, (d.height - gerenciaComanda.getSize().height) / 2);
+        gerenciaComanda.setVisible(true);
+        fonte.dispose();
+        this.moveToFront();
+        try {
+            this.setSelected(true);
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(AddItemComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        fonte = gerenciaComanda;
+    }//GEN-LAST:event_btnAddItemActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

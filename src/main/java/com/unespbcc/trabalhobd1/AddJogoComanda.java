@@ -5,6 +5,15 @@
  */
 package com.unespbcc.trabalhobd1;
 
+import java.awt.Dimension;
+import java.beans.PropertyVetoException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author d-den
@@ -14,10 +23,20 @@ public class AddJogoComanda extends javax.swing.JInternalFrame {
     /**
      * Creates new form AddJogoComanada
      */
+    String cpf;
     GerenciaComanda fonte;
-    public AddJogoComanda(GerenciaComanda f) {
+    Connection con;
+    public AddJogoComanda(GerenciaComanda f,String cpf) {
         initComponents();
         fonte = f;
+        this.cpf = cpf;
+        try {
+            con = ConnectionFactory.createConnection();
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -72,6 +91,11 @@ public class AddJogoComanda extends javax.swing.JInternalFrame {
 
         btnAddJogo.setText("Adicionar");
         btnAddJogo.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnAddJogo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnAddJogoActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -125,9 +149,44 @@ public class AddJogoComanda extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_btnCancelaAddJogoActionPerformed
 
     private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
-        // TODO add your handling code here:
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(AddJogoComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
         fonte.btnAddJogo.setEnabled(true);
     }//GEN-LAST:event_formInternalFrameClosed
+
+    private void btnAddJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddJogoActionPerformed
+        // TODO add your handling code here:
+        String sql = "INSERT INTO comanda_compra_jogos(cpf_cliente,codigo,quantidade) "
+                + "VALUES ("+cpf+","+txtCodJogo.getText()+","+spinQtdJogo.getValue()+")";
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(fonte.jp, "Não foi possível adicionar jogo!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JOptionPane.showMessageDialog(fonte.jp, "Jogo adicionado com sucesso!","Cadastro",JOptionPane.INFORMATION_MESSAGE);
+        txtCodJogo.setText("");
+        spinQtdJogo.setValue(1);
+        
+        GerenciaComanda gerenciaComanda = new GerenciaComanda(cpf,fonte.jp);
+        fonte.jp.jDesktopPane1.add(gerenciaComanda);
+        Dimension d = fonte.jp.jDesktopPane1.getSize();
+        gerenciaComanda.setLocation((d.width - gerenciaComanda.getSize().width) / 2, (d.height - gerenciaComanda.getSize().height) / 2);
+        gerenciaComanda.setVisible(true);
+        fonte.dispose();
+        this.moveToFront();
+        try {
+            this.setSelected(true);
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(AddItemComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        fonte = gerenciaComanda;
+    }//GEN-LAST:event_btnAddJogoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

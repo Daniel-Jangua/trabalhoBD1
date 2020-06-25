@@ -6,6 +6,17 @@
 package com.unespbcc.trabalhobd1;
 
 import java.awt.Dimension;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -17,9 +28,95 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
      * Creates new form GerenciaComanda
      */
     JanelaPrincipal jp;
-    public GerenciaComanda(JanelaPrincipal j) {
+    String cpf;
+    Connection con;
+    public GerenciaComanda(String c,JanelaPrincipal j) {
         initComponents();
         jp = j;
+        cpf = c;
+        String sql = "SELECT * FROM pessoaComanda WHERE cpf_cliente = " + cpf;
+        try {
+            con = ConnectionFactory.createConnection();
+            PreparedStatement stm = con.prepareStatement(sql);
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                txtCPFCli.setText(""+rs.getString("cpf_cliente"));
+                txtCPFFunc.setText(""+rs.getString("cpf_funcionario"));
+                txtVal.setText(""+rs.getString("valor").replace('.', ','));
+                Vector<String> nome_jogos = new Vector<String>();
+                nome_jogos.add("Nenhum");
+                sql = "SELECT nome_jogo FROM jogo"
+                        + " LEFT JOIN comanda on codigo_jogo = cod_jogo_alugado"
+                        + " WHERE comanda.cod_jogo_alugado IS NULL and locacao=true";
+                stm = con.prepareStatement(sql);
+                ResultSet jogos = stm.executeQuery();
+                while(jogos.next())
+                    nome_jogos.add(jogos.getString("nome_jogo"));
+                
+                if(!(rs.getString("nome_jogo") == null)){
+                    nome_jogos.add(rs.getString("nome_jogo"));
+                    cbbJogoAlugado.setModel(new DefaultComboBoxModel(nome_jogos));
+                    cbbJogoAlugado.setSelectedIndex(cbbJogoAlugado.getItemCount()-1);
+                }else{
+                    cbbJogoAlugado.setModel(new DefaultComboBoxModel(nome_jogos));
+                    cbbJogoAlugado.setSelectedIndex(0);
+                }
+                    
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível encontrar cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(EditCliente.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
+        try {
+            ResultSet r1,r2;
+            sql = "SELECT nome_item,quantidade,preco_item FROM itens_cardapio,comanda_consome_itens"
+                + " WHERE codigo = codigo_item and cpf_cliente = "+cpf;
+            PreparedStatement stm = con.prepareStatement(sql);
+            r1 = stm.executeQuery();
+            sql = "SELECT nome_jogo,quantidade,preco_jogo FROM jogo,comanda_compra_jogos"
+                + " WHERE codigo = codigo_jogo and cpf_cliente = "+cpf;
+            stm = con.prepareStatement(sql);
+            r2 = stm.executeQuery();
+            tblNota.setModel(buildTableModel(r1,r2));
+            tblNota.setEnabled(false);
+        } catch (SQLException ex) {
+            Logger.getLogger(ResultadoBuscaCli.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    public static DefaultTableModel buildTableModel(ResultSet rs, ResultSet r2) throws SQLException {
+
+        ResultSetMetaData metaData = rs.getMetaData();
+
+        // names of columns
+        Vector<String> columnNames = new Vector<String>();
+        columnNames.add("Nome");
+        columnNames.add("Quantidade");
+        columnNames.add("Preço(un.)");
+        int columnCount = 3;
+        // data of the table
+        Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+        while (rs.next()) {
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(rs.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+        while(r2.next()){
+            Vector<Object> vector = new Vector<Object>();
+            for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                vector.add(r2.getObject(columnIndex));
+            }
+            data.add(vector);
+        }
+
+        return new DefaultTableModel(data, columnNames);
+
     }
 
     /**
@@ -48,12 +145,29 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
         btnFechaComanda = new javax.swing.JButton();
         btnCancelaEditComanda = new javax.swing.JButton();
         btnEditComanda = new javax.swing.JButton();
-        txtVal = new javax.swing.JFormattedTextField();
+        txtVal = new javax.swing.JTextField();
 
         setClosable(true);
         setIconifiable(true);
         setTitle("Gerenciar Comanda");
         setToolTipText("");
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosed(evt);
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
 
         jLabel1.setText("CPF do Cliente:");
 
@@ -129,6 +243,11 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
         });
 
         btnFechaComanda.setText("Fechar Comanda");
+        btnFechaComanda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFechaComandaActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -173,9 +292,13 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
 
         btnEditComanda.setText("Salvar");
         btnEditComanda.setPreferredSize(new java.awt.Dimension(100, 23));
+        btnEditComanda.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEditComandaActionPerformed(evt);
+            }
+        });
 
         txtVal.setEditable(false);
-        txtVal.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(java.text.NumberFormat.getCurrencyInstance())));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -254,7 +377,7 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
 
     private void btnAddItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddItemActionPerformed
         // TODO add your handling code here:
-        AddItemComanda addItem = new AddItemComanda(this);
+        AddItemComanda addItem = new AddItemComanda(this,cpf);
         btnAddItem.setEnabled(false);
         jp.jDesktopPane1.add(addItem);
         Dimension d = jp.jDesktopPane1.getSize();
@@ -264,7 +387,7 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
 
     private void btnRemoveItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveItemActionPerformed
         // TODO add your handling code here:
-        RemoveItemComanda removeItem = new RemoveItemComanda(this);
+        RemoveItemComanda removeItem = new RemoveItemComanda(this,cpf);
         btnRemoveItem.setEnabled(false);
         jp.jDesktopPane1.add(removeItem);
         Dimension d = jp.jDesktopPane1.getSize();
@@ -274,7 +397,7 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
 
     private void btnAddJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddJogoActionPerformed
         // TODO add your handling code here:
-        AddJogoComanda addJogo = new AddJogoComanda(this);
+        AddJogoComanda addJogo = new AddJogoComanda(this,cpf);
         btnAddJogo.setEnabled(false);
         jp.jDesktopPane1.add(addJogo);
         Dimension d = jp.jDesktopPane1.getSize();
@@ -284,13 +407,80 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
 
     private void btnRemoveJogoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveJogoActionPerformed
         // TODO add your handling code here:
-        RemoveJogoComanda removeJogo = new RemoveJogoComanda(this);
+        RemoveJogoComanda removeJogo = new RemoveJogoComanda(this,cpf);
         btnRemoveJogo.setEnabled(false);
         jp.jDesktopPane1.add(removeJogo);
         Dimension d = jp.jDesktopPane1.getSize();
         removeJogo.setLocation((d.width - removeJogo.getSize().width) / 2, (d.height - removeJogo.getSize().height) / 2);
         removeJogo.setVisible(true);
     }//GEN-LAST:event_btnRemoveJogoActionPerformed
+
+    private void formInternalFrameClosed(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosed
+        try {
+            // TODO add your handling code here:
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(GerenciaComanda.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_formInternalFrameClosed
+
+    private void btnEditComandaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditComandaActionPerformed
+        // TODO add your handling code here:
+        String sql = "SELECT codigo_jogo FROM jogo WHERE nome_jogo = '"+cbbJogoAlugado.getSelectedItem()+"'";
+        ResultSet r1;
+        
+        try {
+            PreparedStatement stm = con.prepareStatement(sql);
+            r1 = stm.executeQuery();
+
+            int rowcount = 0;
+            if (r1.last()) {
+              rowcount = r1.getRow();
+              r1.beforeFirst(); // not rs.first() because the rs.next() below will move on, missing the first element
+            }
+            if(rowcount==0){
+                sql = "UPDATE comanda SET cod_jogo_alugado = null WHERE cpf_cliente = "+cpf;
+            }else{
+                while(r1.next()){
+                    sql = "UPDATE comanda SET cod_jogo_alugado = " + r1.getString("codigo_jogo") + " WHERE cpf_cliente = " + cpf;
+                }
+            }
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a atualização!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            return;
+        } 
+        JOptionPane.showMessageDialog(null, "Comanda atualizado com sucesso!","Atualização",JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }//GEN-LAST:event_btnEditComandaActionPerformed
+
+    private void btnFechaComandaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFechaComandaActionPerformed
+        // TODO add your handling code here:
+        int op = JOptionPane.showConfirmDialog(jp, "Tem certeza que deseja fechar a comanda?", "Atenção!", JOptionPane.OK_CANCEL_OPTION);
+        if(op == JOptionPane.CANCEL_OPTION)
+            return;
+        String val = txtVal.getText();
+        String sql;
+        PreparedStatement stm;
+        try {
+            sql = "DELETE FROM comanda_consome_itens WHERE cpf_cliente = "+cpf;
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+            sql = "DELETE FROM comanda_compra_jogos WHERE cpf_cliente = "+cpf;
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+            sql = "DELETE FROM comanda WHERE cpf_cliente = " + cpf;
+            stm = con.prepareStatement(sql);
+            stm.executeUpdate();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(jp, "Não foi possível fechar a comanda!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
+            //dispose();
+            return;
+        }
+        JOptionPane.showMessageDialog(jp,"Comanda fechada!\nTotal a pagar: R$ "+val, "Pagamento",JOptionPane.INFORMATION_MESSAGE);
+        dispose();
+    }//GEN-LAST:event_btnFechaComandaActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -311,6 +501,6 @@ public class GerenciaComanda extends javax.swing.JInternalFrame {
     private javax.swing.JTable tblNota;
     private javax.swing.JTextField txtCPFCli;
     private javax.swing.JTextField txtCPFFunc;
-    private javax.swing.JFormattedTextField txtVal;
+    private javax.swing.JTextField txtVal;
     // End of variables declaration//GEN-END:variables
 }

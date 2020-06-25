@@ -182,7 +182,8 @@ public class ResultadoBuscaCli extends javax.swing.JInternalFrame {
             stm.executeUpdate();
         } catch (SQLException ex) {
             JOptionPane.showMessageDialog(fonte.jp, "Não foi possível exluir cliente!\n"+ex.toString(),"Erro",JOptionPane.ERROR_MESSAGE);
-            dispose();
+            //dispose();
+            return;
         }
         JOptionPane.showMessageDialog(fonte.jp,"Cliente excluído com sucesso!", "Exclusão",JOptionPane.INFORMATION_MESSAGE);
         dispose();
